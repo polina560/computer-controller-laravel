@@ -1,0 +1,11 @@
+.osp
+.osp.example
+bootstrap/cache/config.php
+bootstrap/cache/events.php
+bootstrap/cache/moonshine.php
+bootstrap/cache/packages.php
+bootstrap/cache/routes-v7.php
+bootstrap/cache/services.php
+node_modules
+tests
+vendor

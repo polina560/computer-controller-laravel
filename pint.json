@@ -1,0 +1,9 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "function_declaration": {
+            "closure_fn_spacing": "none"
+        },
+        "not_operator_with_successor_space": false
+    }
+}

@@ -1,0 +1,62 @@
+{
+    "_comment": "php artisan moonshine:build test.json",
+    "resources": [
+        {
+            "name": "Computer",
+            "menuName": "Компьютеры",
+            "table": "computer",
+            "timestamps": true,
+            "withMigration": true,
+            "withModel": true,
+            "withResource": true,
+            "fields": [
+                {
+                    "column": "id",
+                    "type": "id",
+                    "methods": [
+                        "sortable"
+                    ]
+                },
+                {
+                    "column": "computer_name",
+                    "type": "string",
+                    "nullable": true
+                },
+                {
+                    "column": "full_name",
+                    "type": "string",
+                    "nullable": true
+                },
+                {
+                    "column": "ip_address",
+                    "type": "string"
+                },
+                {
+                    "column": "mac_address",
+                    "type": "string",
+                    "nullable": true
+                },
+                {
+                    "column": "status",
+                    "type": "integer",
+                    "default": 0,
+                    "nullable": true,
+                    "field": "Enum"
+                },
+                {
+                    "column": "updated_at",
+                    "nullable": true,
+                    "type": "integer"
+                },
+                {
+                    "column": "user_id",
+                    "type": "BelongsTo",
+                    "nullable": true,
+                    "relation": {
+                        "table" : "users"
+                    }
+                }
+            ]
+        }
+    ]
+}

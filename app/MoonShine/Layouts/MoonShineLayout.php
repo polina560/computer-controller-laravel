@@ -13,6 +13,7 @@ use MoonShine\MenuManager\MenuItem;
 use MoonShine\UI\Components\Layout\Layout;
 use Override;
 use App\MoonShine\Resources\ComputerResource;
+use App\MoonShine\Resources\ComputerLogResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -32,6 +33,7 @@ final class MoonShineLayout extends AppLayout
             MenuItem::make('Пользователи', UserResource::class),
             MenuItem::make('Тексты', TextResource::class),
             MenuItem::make('Компьютеры', ComputerResource::class),
+            MenuItem::make('Компьютеры', ComputerLogResource::class),
         ];
     }
 

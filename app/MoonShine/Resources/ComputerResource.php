@@ -6,18 +6,16 @@ namespace App\MoonShine\Resources;
 
 use App\Enums\BooleanStatus;
 use App\Models\Computer;
-
 use Illuminate\Database\Eloquent\Model;
+use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\ActionButton;
-use MoonShine\UI\Components\ActionGroup;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
-use MoonShine\UI\Fields\Enum;
-use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 
 /**
  * @extends ModelResource<Computer>
@@ -54,15 +52,15 @@ class ComputerResource extends ModelResource
     {
         return [
             Box::make([
-                ...$this->indexFields()
-            ])
+                ...$this->indexFields(),
+            ]),
         ];
     }
 
     public function detailFields(): iterable
     {
         return [
-            ...$this->indexFields()
+            ...$this->indexFields(),
         ];
     }
 
@@ -77,16 +75,20 @@ class ComputerResource extends ModelResource
         return parent::indexButtons()
             ->prepend(
 
-                ActionButton::make('PowerOn')
+                ActionButton::make('')
                     ->icon('power')
                     ->method('powerOn', fn(Model $item): array => ['resourceItem' => $item->getKey()])
                     ->success(),
-                ActionButton::make('PowerOff')
+                ActionButton::make('')
                     ->icon('power')
                     ->method('powerOff', fn(Model $item): array => ['resourceItem' => $item->getKey()])
                     ->error(),
-                ActionButton::make('PowerOn')->method('powerOnList')->bulk()->success(),
-                ActionButton::make('PowerOff')->method('powerOffList')->bulk()->error(),
+                ActionButton::make('')
+                    ->icon('arrow-path')
+                    ->method('updateStatus', fn(Model $item): array => ['resourceItem' => $item->getKey()])
+                    ->primary(),
+                //                ActionButton::make('PowerOn')->method('powerOnList')->bulk()->success(),
+                //                ActionButton::make('PowerOff')->method('powerOffList')->bulk()->error(),
 
             );
     }
@@ -134,6 +136,7 @@ class ComputerResource extends ModelResource
 
     public function updateStatus(MoonShineRequest $request): void
     {
+        $computer = $request->getResource()->getItem();
+        $computer->ping(1);
     }
-
 }

@@ -2,13 +2,12 @@
     "_comment": "php artisan moonshine:build test.json",
     "resources": [
         {
-            "name": "Computer",
+            "name": "ComputerLog",
             "menuName": "Компьютеры",
-            "table": "computer",
+            "table": "computer_log",
             "timestamps": true,
             "withMigration": true,
             "withModel": true,
-            "withResource": true,
             "fields": [
                 {
                     "column": "id",
@@ -18,43 +17,23 @@
                     ]
                 },
                 {
-                    "column": "computer_name",
-                    "type": "string",
-                    "nullable": true
-                },
-                {
-                    "column": "full_name",
-                    "type": "string",
-                    "nullable": true
-                },
-                {
-                    "column": "ip_address",
-                    "type": "string"
-                },
-                {
-                    "column": "mac_address",
-                    "type": "string",
-                    "nullable": true
+                    "column": "computer_id",
+                    "type": "BelongsTo",
+                    "nullable": true,
+                    "relation": {
+                        "table" : "computer"
+                    }
                 },
                 {
                     "column": "status",
                     "type": "integer",
-                    "default": 0,
-                    "nullable": true,
-                    "field": "Enum"
+                    "nullable": true
                 },
+
                 {
                     "column": "updated_at",
                     "nullable": true,
                     "type": "integer"
-                },
-                {
-                    "column": "user_id",
-                    "type": "BelongsTo",
-                    "nullable": true,
-                    "relation": {
-                        "table" : "users"
-                    }
                 }
             ]
         }

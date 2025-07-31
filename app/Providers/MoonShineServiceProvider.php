@@ -14,6 +14,7 @@ use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
 use App\MoonShine\Resources\ComputerResource;
+use App\MoonShine\Resources\ComputerLogResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -32,6 +33,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 TextResource::class,
                 UserResource::class,
                 ComputerResource::class,
+                ComputerLogResource::class,
             ])
             ->pages([
                 ...$config->getPages(),

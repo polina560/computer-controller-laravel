@@ -87,8 +87,9 @@ class ComputerResource extends ModelResource
                     ->icon('arrow-path')
                     ->method('updateStatus', fn(Model $item): array => ['resourceItem' => $item->getKey()])
                     ->primary(),
-                //                ActionButton::make('PowerOn')->method('powerOnList')->bulk()->success(),
-                //                ActionButton::make('PowerOff')->method('powerOffList')->bulk()->error(),
+                ActionButton::make('PowerOn')->method('powerOnList')->bulk()->success(),
+                ActionButton::make('PowerOff')->method('powerOffList')->bulk()->error(),
+                ActionButton::make('updateStatusList')->method('updateStatusList')->bulk()->error(),
 
             );
     }
@@ -138,5 +139,13 @@ class ComputerResource extends ModelResource
     {
         $computer = $request->getResource()->getItem();
         $computer->ping(1);
+    }
+
+    public function updateStatusList(MoonShineRequest $request): void
+    {
+        $computers = $request->getResource()->getItems();
+        foreach ($computers as $computer) {
+            $computer->ping();
+        }
     }
 }

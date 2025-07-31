@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\BooleanStatus;
-use common\components\queue\ShellExecUpdateJob;
+use App\Jobs\ShellExecJob;
+use App\Jobs\ShellExecWinJob;
+use App\Jobs\WakeOnLANJob;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,26 +32,30 @@ class Computer extends Model
 
     public function powerOn()
     {
-        $this->status = 1;
-        $this->save();
+        if (!isset($this->mac_address)) {
+            throw new \Exception('No mac');
+        }
+        WakeOnLANJob::dispatch($this->id);
+
     }
 
-    public function powerOff()
+    /**
+     * Выключение компьютера в локальной сети
+     */
+    public function powerOff(): void
     {
-        $this->status = 0;
-        $this->save();
-    }
+        $user = config('computer.RC_USER');
+        $pass = config('computer.RC_PASS');
 
-    public function powerOnList()
-    {
-        $this->status = 1;
-        $this->save();
-    }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            //            exec("net use \\\\$this->ip_address $pass /user:$user");
+            //            exec("Shutdown /s /f -m \\\\$this->ip_address"); // Windows
+            ShellExecWinJob::dispatch("net use \\\\$this->ip_address $pass /user:$user", "Shutdown /s /f -m \\\\$this->ip_address");
+        } else {
+            //            exec("net rpc shutdown -I $this->ip_address -U $user%$pass -f -t 0");
+            ShellExecJob::dispatch("net rpc shutdown -I $this->ip_address -U $user%$pass -f -t 0");
 
-    public function powerOffList()
-    {
-        $this->status = 0;
-        $this->save();
+        }
     }
 
     public function ping($one = null)
@@ -61,22 +68,15 @@ class Computer extends Model
                 exec("ping -c1 {$this->ip_address}", $output);
             } // *nix
             $this->statusUpdate($output);
+        } else {
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $job = ["ping -n 1 {$this->ip_address}", $this->id];
+            } // Windows
+            else {
+                $job = ["ping -c1 {$this->ip_address}", $this->id];
+            } // *nix
+            ShellExecUpdateJob:dispatch($job);
         }
-        //        } else {
-        //            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        //                Yii::$app->queue->push(new ShellExecUpdateJob([
-        //                    'cmd' => "ping -n 1 {$this->ip_address}",
-        //                    'computerId' => $this->id,
-        //                ]));
-        //            } //Windows
-        //            else {
-        //                $job = new ShellExecUpdateJob([
-        //                    'cmd' => "ping -c1 {$this->ip_address}",
-        //                    'computerId' => $this->id,
-        //                ]);
-        //                Yii::$app->queue->push($job);
-        //            } //*nix
-        //        }
 
         $computer_log = new ComputerLog;
         $computer_log->computer_id = $this->id;
@@ -95,5 +95,59 @@ class Computer extends Model
             $this->status = BooleanStatus::No->value;
         }
         $this->save();
+    }
+
+    public static function _privateWakeOnLan(string $addr, array $addr_byte, int $socket_number = 7): array
+    {
+        $hw_addr = '';
+
+        for ($a = 0; $a < 6; $a++) {
+            $hw_addr .= chr(hexdec($addr_byte[$a]));
+        }
+
+        $msg = chr(255).chr(255).chr(255).chr(255).chr(255).chr(255);
+
+        for ($a = 1; $a <= 16; $a++) {
+            $msg .= $hw_addr;
+        }
+
+        if (!extension_loaded('sockets')) {
+            throw new Exception(
+                'Error: Extension <strong>php_sockets</strong> is not loaded! You need to enable it in <strong>php.ini</strong>',
+            );
+        }
+        $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        if (!$s) {
+            throw new Exception(
+                'Can\'t create socket!\n'.
+                'Error: \''.socket_last_error($s).'\' - '.socket_strerror(socket_last_error($s)),
+            );
+        } else {
+            $opt_ret = socket_set_option($s, SOL_SOCKET, SO_BROADCAST, true);
+
+            if ($opt_ret < 0) {
+                throw new Exception(
+                    'setsockopt() failed, error: '.socket_strerror((int) $opt_ret),
+                );
+            }
+
+            if (socket_sendto($s, $msg, strlen($msg), 0, $addr, $socket_number)) {
+                $content = bin2hex($msg);
+                socket_close($s);
+
+                return [
+                    'message' => "Magic Packet Sent!<BR>\n".
+                        'Data: <textarea readonly rows="1" name="content" cols="'.strlen(
+                            $content,
+                        ).'">'.$content."</textarea><BR>\n".
+                        'Port: '.$socket_number."<br>\n".
+                        'MAC: '.implode(':', $addr_byte)."<BR>\n",
+                ];
+            } else {
+                throw new Exception(
+                    'Magic Packet failed to send!',
+                );
+            }
+        }
     }
 }

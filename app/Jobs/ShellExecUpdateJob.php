@@ -12,16 +12,15 @@ class ShellExecUpdateJob implements ShouldQueue
     use Queueable;
 
     public string $cmd;
-
     public int $computerId;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(string $cmd, int $computerId) {
+    public function __construct(string $cmd, int $computerId)
+    {
         $this->computerId = $computerId;
         $this->cmd = $cmd;
-
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\BooleanStatus;
 use App\Jobs\ShellExecJob;
+use App\Jobs\ShellExecUpdateJob;
 use App\Jobs\ShellExecWinJob;
 use App\Jobs\WakeOnLANJob;
 use Exception;
@@ -69,13 +70,11 @@ class Computer extends Model
             } // *nix
             $this->statusUpdate($output);
         } else {
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                $job = ["ping -n 1 {$this->ip_address}", $this->id];
-            } // Windows
-            else {
-                $job = ["ping -c1 {$this->ip_address}", $this->id];
-            } // *nix
-            ShellExecUpdateJob:dispatch($job);
+            $command = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
+                ? "ping -n 1 {$this->ip_address}"
+                : "ping -c1 {$this->ip_address}";
+
+            ShellExecUpdateJob::dispatch($command, $this->id);
         }
 
         $computer_log = new ComputerLog;

@@ -8,8 +8,10 @@ use App\Enums\BooleanStatus;
 use App\Models\Computer;
 use Illuminate\Database\Eloquent\Model;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
+use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
 use MoonShine\Laravel\MoonShineRequest;
 use MoonShine\Laravel\Resources\ModelResource;
+use MoonShine\Support\Enums\ToastType;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\Layout\Box;
@@ -82,14 +84,27 @@ class ComputerResource extends ModelResource
                 ActionButton::make('')
                     ->icon('power')
                     ->method('powerOff', fn(Model $item): array => ['resourceItem' => $item->getKey()])
-                    ->error(),
+                    ->error()
+                    ->withConfirm(
+                        'Подтверждение',
+                        'Вы действительно хотите выключить компьютер?',
+                        'Да, выключить'
+                    ),
                 ActionButton::make('')
                     ->icon('arrow-path')
                     ->method('updateStatus', fn(Model $item): array => ['resourceItem' => $item->getKey()])
                     ->primary(),
-                ActionButton::make('PowerOn')->method('powerOnList')->bulk()->success(),
-                ActionButton::make('PowerOff')->method('powerOffList')->bulk()->error(),
-                ActionButton::make('updateStatusList')->method('updateStatusList')->bulk()->error(),
+                ActionButton::make('Включить')->bulk()->icon('power')->method('powerOnList')->success(),
+                ActionButton::make('Выключить')->bulk()->icon('power')->method('powerOffList')->error()->withConfirm(
+                    'Подтверждение',
+                    'Вы действительно хотите выключить выбранные компьютеры?',
+                    'Да, выключить'
+                ),
+                ActionButton::make('Обновить статус')
+                    ->bulk()
+                    ->icon('arrow-path')
+                    ->method('updateStatusList')
+                    ->primary()
 
             );
     }
@@ -119,33 +134,71 @@ class ComputerResource extends ModelResource
         $computer->powerOff();
     }
 
-    public function powerOnList(MoonShineRequest $request): void
-    {
-        $computers = $request->getResource()->getItems();
-        foreach ($computers as $computer) {
-            $computer->powerOn();
-        }
-    }
-
-    public function powerOffList(MoonShineRequest $request): void
-    {
-        $computers = $request->getResource()->getItems();
-        foreach ($computers as $computer) {
-            $computer->powerOff();
-        }
-    }
-
     public function updateStatus(MoonShineRequest $request): void
     {
         $computer = $request->getResource()->getItem();
         $computer->ping(1);
     }
 
-    public function updateStatusList(MoonShineRequest $request): void
+    public function powerOnList(MoonShineRequest $request): MoonShineJsonResponse
     {
-        $computers = $request->getResource()->getItems();
+        $ids = $request->array('ids');
+
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+
+        $computers = Computer::whereIn('id', $ids)->get();
         foreach ($computers as $computer) {
+            $computer->powerOn();
+        }
+
+        return MoonShineJsonResponse::make()
+            ->toast(
+                'Выбранные компьютеры выключены',
+                ToastType::SUCCESS
+            );
+    }
+
+    public function powerOffList(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $ids = $request->array('ids');
+
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+
+        $computers = Computer::whereIn('id', $ids)->get();
+        foreach ($computers as $computer) {
+            $computer->powerOff();
+        }
+
+        return MoonShineJsonResponse::make()
+            ->toast(
+                'Выбранные компьютеры выключены',
+                ToastType::SUCCESS
+            );
+    }
+
+    public function updateStatusList(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $ids = $request->array('ids');
+
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+
+        $processed = 0;
+        $computers = Computer::whereIn('id', $ids)->get();
+        foreach ($computers as $computer) {
+            $processed++;
             $computer->ping();
         }
+
+        return MoonShineJsonResponse::make()
+            ->toast(
+                'Статус обновлен для '.$processed.' компьютеров',
+                $processed > 0 ? ToastType::SUCCESS : ToastType::ERROR
+            );
     }
 }

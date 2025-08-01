@@ -12,7 +12,16 @@ use App\Jobs\WakeOnLANJob;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OpenApi\Attributes\Property;
+use OpenApi\Attributes\Schema;
 
+#[Schema(properties: [
+    new Property(property: 'computer_name', type: 'string'),
+    new Property(property: 'full_name', type: 'string'),
+    new Property(property: 'ip_address', type: 'string'),
+    new Property(property: 'mac_address', type: 'string'),
+    new Property(property: 'status', type: 'string'),
+])]
 class Computer extends Model
 {
     protected $table = 'computer';

@@ -31,9 +31,9 @@ final class MoonShineLayout extends AppLayout
         return [
             ...parent::menu(),
             MenuItem::make('Пользователи', UserResource::class),
-            MenuItem::make('Тексты', TextResource::class),
+//            MenuItem::make('Тексты', TextResource::class),
             MenuItem::make('Компьютеры', ComputerResource::class),
-            MenuItem::make('Компьютеры', ComputerLogResource::class),
+            MenuItem::make('Логи', ComputerLogResource::class),
         ];
     }
 

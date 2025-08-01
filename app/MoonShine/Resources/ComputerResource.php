@@ -46,7 +46,9 @@ class ComputerResource extends ModelResource
             Enum::make('Status', 'status')
                 ->default(0)
                 ->attach(BooleanStatus::class),
-            BelongsTo::make('UserId', 'user', resource: UserResource::class),
+            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
+                ->afterFill(
+                    fn($field) => $field->setColumn('user_id'))
         ];
     }
 

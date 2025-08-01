@@ -58,11 +58,8 @@ class Computer extends Model
         $pass = config('computer.RC_PASS');
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            //            exec("net use \\\\$this->ip_address $pass /user:$user");
-            //            exec("Shutdown /s /f -m \\\\$this->ip_address"); // Windows
             ShellExecWinJob::dispatch("net use \\\\$this->ip_address $pass /user:$user", "Shutdown /s /f -m \\\\$this->ip_address");
         } else {
-            //            exec("net rpc shutdown -I $this->ip_address -U $user%$pass -f -t 0");
             ShellExecJob::dispatch("net rpc shutdown -I $this->ip_address -U $user%$pass -f -t 0");
 
         }

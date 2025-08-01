@@ -5,66 +5,68 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Models\ComputerLog;
-
+use MoonShine\Laravel\Components\Fragment;
 use MoonShine\Laravel\Resources\ModelResource;
-use MoonShine\UI\Components\Layout\Box;
-use MoonShine\UI\Fields\ID;
-use MoonShine\Laravel\Fields\Relationships\BelongsTo;
-use MoonShine\UI\Fields\Number;
+use MoonShine\UI\Components\Layout\Grid;
+use MoonShine\UI\Components\Layout\Column;
 
-/**
- * @extends ModelResource<ComputerLog>
- */
 class ComputerLogResource extends ModelResource
 {
     protected string $model = ComputerLog::class;
+    protected string $title = 'Статус компьютеров';
+    protected bool $createInModal = true;
+    protected bool $editInModal = true;
+    protected array $with = ['computer'];
 
-	protected array $with = ['computer'];
-
-    public function getTitle(): string
+    public function indexComponents(): array
     {
-        return 'Компьютеры';
-    }
-
-    public function indexFields(): iterable
-    {
-        // TODO correct labels values
         return [
-			ID::make('id')
-				->sortable(),
-			BelongsTo::make('ComputerId', 'computer', resource: ComputerResource::class),
-			Number::make('Status', 'status'),
+            Grid::make([
+                Column::make([
+                    $this->getChartFragment(),
+                ])->columnSpan(12),
+            ]),
         ];
     }
 
-    public function formFields(): iterable
+    protected function getChartFragment(): Fragment
     {
-        return [
-            Box::make([
-                ...$this->indexFields()
-            ])
-        ];
+        return Fragment::make([
+            view('moonshine.components.status-chart', [
+                'chartData' => $this->getChartData()
+            ])->render()
+        ]);
     }
 
-    public function detailFields(): iterable
+    protected function getChartData(): array
     {
-        return [
-            ...$this->indexFields()
-        ];
+        try {
+            return ComputerLog::query()
+                ->with(['computer' => fn($q) => $q->select('id', 'name')])
+                ->where('created_at', '>=', now()->subDays(7))
+                ->orderBy('created_at')
+                ->get()
+                ->groupBy('computer_id')
+                ->map(function ($logs, $computerId) {
+                    $computer = $logs->first()->computer;
+
+                    return [
+                        'name' => $computer->name ?? 'Computer '.$computerId,
+                        'data' => $logs->map(fn($log) => [
+                            'x' => $log->created_at->format('Y-m-d H:i:s'),
+                            'y' => (int)$log->status,
+                            'fillColor' => $log->status ? '#10B981' : '#EF4444'
+                        ])->toArray()
+                    ];
+                })
+                ->values()
+                ->toArray();
+        } catch (\Exception $e) {
+            report($e);
+            return [];
+        }
     }
 
-    public function filters(): iterable
-    {
-        return [
-        ];
-    }
-
-    public function rules(mixed $item): array
-    {
-        // TODO change it to your own rules
-        return [
-			'computer_id' => ['int', 'nullable'],
-			'status' => ['int', 'nullable'],
-        ];
-    }
+    public function filters(): array { return []; }
+    public function rules($item): array { return []; }
 }

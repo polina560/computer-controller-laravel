@@ -5,36 +5,39 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Models\ComputerLog;
+use MoonShine\Apexcharts\Components\DonutChartMetric;
 use MoonShine\Laravel\Components\Fragment;
+use MoonShine\Laravel\Pages\Crud\IndexPage;
+use MoonShine\Laravel\Pages\Page;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Grid;
-use MoonShine\UI\Components\Layout\Column;
 
 class ComputerLogResource extends ModelResource
 {
     protected string $model = ComputerLog::class;
+
     protected string $title = 'Статус компьютеров';
+
     protected bool $createInModal = true;
+
+
     protected bool $editInModal = true;
+
     protected array $with = ['computer'];
 
-    public function indexComponents(): array
+
+
+    protected function indexFields(): iterable
     {
-        return [
-            Grid::make([
-                Column::make([
-                    $this->getChartFragment(),
-                ])->columnSpan(12),
-            ]),
-        ];
+        return [];
     }
 
     protected function getChartFragment(): Fragment
     {
         return Fragment::make([
             view('moonshine.components.status-chart', [
-                'chartData' => $this->getChartData()
-            ])->render()
+                'chartData' => $this->getChartData(),
+            ])->render(),
         ]);
     }
 
@@ -54,19 +57,27 @@ class ComputerLogResource extends ModelResource
                         'name' => $computer->name ?? 'Computer '.$computerId,
                         'data' => $logs->map(fn($log) => [
                             'x' => $log->created_at->format('Y-m-d H:i:s'),
-                            'y' => (int)$log->status,
-                            'fillColor' => $log->status ? '#10B981' : '#EF4444'
-                        ])->toArray()
+                            'y' => (int) $log->status,
+                            'fillColor' => $log->status ? '#10B981' : '#EF4444',
+                        ])->toArray(),
                     ];
                 })
                 ->values()
                 ->toArray();
         } catch (\Exception $e) {
             report($e);
+
             return [];
         }
     }
 
-    public function filters(): array { return []; }
-    public function rules($item): array { return []; }
+    public function filters(): array
+    {
+        return [];
+    }
+
+    public function rules($item): array
+    {
+        return [];
+    }
 }

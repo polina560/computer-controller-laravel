@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\MoonShine\Pages\LogPage;
+use App\MoonShine\Resources\ComputerLogResource;
+use App\MoonShine\Resources\ComputerResource;
 use App\MoonShine\Resources\MoonShineUserResource;
 use App\MoonShine\Resources\MoonShineUserRoleResource;
 use App\MoonShine\Resources\TextResource;
@@ -13,8 +16,6 @@ use MoonShine\Contracts\Core\DependencyInjection\ConfiguratorContract;
 use MoonShine\Contracts\Core\DependencyInjection\CoreContract;
 use MoonShine\Laravel\DependencyInjection\MoonShine;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
-use App\MoonShine\Resources\ComputerResource;
-use App\MoonShine\Resources\ComputerLogResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -37,6 +38,7 @@ class MoonShineServiceProvider extends ServiceProvider
             ])
             ->pages([
                 ...$config->getPages(),
+                LogPage::class,
             ]);
     }
 }

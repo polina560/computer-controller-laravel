@@ -1,5 +1,7 @@
 <?php
 
+use App\MoonShine\Pages\Log;
+use App\MoonShine\Pages\LogPage;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -88,6 +90,7 @@ return [
 
     'pages' => [
         'dashboard' => App\MoonShine\Pages\Dashboard::class,
+        'log-page' => LogPage::class,
         'profile' => ProfilePage::class,
         'login' => LoginPage::class,
         'error' => ErrorPage::class,

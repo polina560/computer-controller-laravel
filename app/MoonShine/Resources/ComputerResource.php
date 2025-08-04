@@ -30,6 +30,8 @@ class ComputerResource extends ModelResource
 
     protected array $with = ['user'];
 
+//    protected ?ClickAction $clickAction = ClickAction::EDIT;
+
     public function getTitle(): string
     {
         return 'Компьютеры';
@@ -45,18 +47,19 @@ class ComputerResource extends ModelResource
             Text::make('FullName', 'full_name')->sortable(),
             Text::make('IpAddress', 'ip_address')->sortable(),
             Text::make('MacAddress', 'mac_address')->sortable(),
-            //            Enum::make('Status', 'status')
-            //                ->default(0)
-            //                ->attach(BooleanStatus::class),
             Enum::make('Status', 'status')
+                ->default(0)
                 ->attach(BooleanStatus::class)
-                ->asyncMethod(
-                    'changeStatus',
-                    events: [
-                        AlpineJs::event(JsEvent::TABLE_UPDATED), // Правильное событие
-                    ]
-                )
-                ->showWhenUpdated(),
+                ->sortable(),
+            //            Enum::make('Status', 'status')
+            //                ->attach(BooleanStatus::class)
+            //                ->asyncMethod(
+            //                    'changeStatus',
+            //                    events: [
+            //                        AlpineJs::event(JsEvent::TABLE_UPDATED), // Правильное событие
+            //                    ]
+            //                )
+            //                ->showWhenUpdated(),
             BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
                 ->afterFill(
                     fn($field) => $field->setColumn('user_id'))

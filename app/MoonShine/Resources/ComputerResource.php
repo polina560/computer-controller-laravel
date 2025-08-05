@@ -6,6 +6,7 @@ namespace App\MoonShine\Resources;
 
 use App\Enums\BooleanStatus;
 use App\Models\Computer;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
@@ -19,6 +20,7 @@ use MoonShine\UI\Components\ActionButton;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Text;
 
 /**
@@ -30,7 +32,7 @@ class ComputerResource extends ModelResource
 
     protected array $with = ['user'];
 
-//    protected ?ClickAction $clickAction = ClickAction::EDIT;
+    //    protected ?ClickAction $clickAction = ClickAction::EDIT;
 
     public function getTitle(): string
     {
@@ -43,10 +45,26 @@ class ComputerResource extends ModelResource
         return [
             ID::make('id')
                 ->sortable(),
-            Text::make('ComputerName', 'computer_name')->sortable(),
-            Text::make('FullName', 'full_name')->sortable(),
-            Text::make('IpAddress', 'ip_address')->sortable(),
-            Text::make('MacAddress', 'mac_address')->sortable(),
+            Text::make('ComputerName', 'computer_name')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('FullName', 'full_name')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('IpAddress', 'ip_address')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('MacAddress', 'mac_address')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
             Enum::make('Status', 'status')
                 ->default(0)
                 ->attach(BooleanStatus::class)
@@ -60,26 +78,17 @@ class ComputerResource extends ModelResource
             //                    ]
             //                )
             //                ->showWhenUpdated(),
-            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
-                ->afterFill(
-                    fn($field) => $field->setColumn('user_id'))
-                ->sortable(),
+            Select::make('User', 'user_id')
+                ->options(User::query()->pluck('name', 'id')->toArray())
+                ->sortable()
+                ->searchable()
+                ->updateOnPreview()
+//            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
+//                ->afterFill(
+//                    fn($field) => $field->setColumn('user_id'))
+//                ->sortable()
+//                ->searchable()
         ];
-    }
-
-    public function changeStatus(MoonShineRequest $request): MoonShineJsonResponse
-    {
-        $item = $this->getItem();
-        $status = $request->input('value');
-
-        $item->status = $status;
-        $item->save();
-
-        return MoonShineJsonResponse::make()
-            ->toast('Status updated')
-            ->addEvent(
-                AlpineJs::event(JsEvent::TABLE_UPDATED) // Отправляем событие обновления
-            );
     }
 
     public function formFields(): iterable
@@ -131,6 +140,9 @@ class ComputerResource extends ModelResource
                     ->icon('arrow-path')
                     ->method('updateStatusList')
                     ->primary()
+                    ->async(
+                        events: [AlpineJs::event(JsEvent::TABLE_UPDATED)]
+                    )
 
             );
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ComputerStatusController;
 use App\MoonShine\Resources\ComputerLogResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -10,15 +11,5 @@ Route::get('/api/docs', fn() => view('swagger/ui', [
     'jsonUrl' => url('/api/openapi.json'),
 ]))->middleware('moonshine.basic');
 
-Route::prefix('admin')->middleware(['web', 'moonshine'])->group(function() {
-    Route::get('/computer-logs/chart-data', function() {
-        try {
-            return response()->json(
-                app(\App\MoonShine\Resources\ComputerLogResource::class)->getChartData()
-            );
-        } catch (\Exception $e) {
-            Log::error('Chart data error: '.$e->getMessage());
-            return response()->json([], 500);
-        }
-    });
-});
+Route::get('admin/computer-status-data', [ComputerStatusController::class, 'getData'])
+    ->name('moonshine.computer.status.data');

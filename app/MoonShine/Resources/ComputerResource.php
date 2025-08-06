@@ -83,11 +83,12 @@ class ComputerResource extends ModelResource
                 ->sortable()
                 ->searchable()
                 ->updateOnPreview()
-//            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
-//                ->afterFill(
-//                    fn($field) => $field->setColumn('user_id'))
-//                ->sortable()
-//                ->searchable()
+                ->nullable(),
+            //            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
+            //                ->afterFill(
+            //                    fn($field) => $field->setColumn('user_id'))
+            //                ->sortable()
+            //                ->searchable()
         ];
     }
 

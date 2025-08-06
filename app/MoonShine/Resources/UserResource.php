@@ -118,7 +118,7 @@ class UserResource extends ModelResource implements HasImportExportContract
             ID::make()->sortable(),
             Text::make('Имя', 'name'),
             Email::make('Email', 'email'),
-            Password::make('Password', 'password'),
+            Password::make('Пароль', 'password'),
         ];
     }
 

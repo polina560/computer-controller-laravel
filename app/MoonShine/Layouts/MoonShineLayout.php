@@ -32,7 +32,7 @@ final class MoonShineLayout extends AppLayout
             MenuItem::make('Пользователи', UserResource::class),
             //            MenuItem::make('Тексты', TextResource::class),
             MenuItem::make('Компьютеры', ComputerResource::class),
-            MenuItem::make('Логи', LogPage::class),
+            MenuItem::make('Статистика', LogPage::class),
         ];
     }
 

@@ -45,50 +45,36 @@ class ComputerResource extends ModelResource
         return [
             ID::make('id')
                 ->sortable(),
-            Text::make('ComputerName', 'computer_name')
-                ->sortable()
-                ->updateOnPreview(
-                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
-                ),
-            Text::make('FullName', 'full_name')
-                ->sortable()
-                ->updateOnPreview(
-                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
-                ),
-            Text::make('IpAddress', 'ip_address')
-                ->sortable()
-                ->updateOnPreview(
-                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
-                ),
-            Text::make('MacAddress', 'mac_address')
-                ->sortable()
-                ->updateOnPreview(
-                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
-                ),
-            Enum::make('Status', 'status')
-                ->default(0)
-                ->attach(BooleanStatus::class)
-                ->sortable(),
-            //            Enum::make('Status', 'status')
-            //                ->attach(BooleanStatus::class)
-            //                ->asyncMethod(
-            //                    'changeStatus',
-            //                    events: [
-            //                        AlpineJs::event(JsEvent::TABLE_UPDATED), // Правильное событие
-            //                    ]
-            //                )
-            //                ->showWhenUpdated(),
-            Select::make('User', 'user_id')
+            Select::make('Пользователь', 'user_id')
                 ->options(User::query()->pluck('name', 'id')->toArray())
                 ->sortable()
                 ->searchable()
                 ->updateOnPreview()
                 ->nullable(),
-            //            BelongsTo::make('UserId', 'user', 'name', resource: UserResource::class)
-            //                ->afterFill(
-            //                    fn($field) => $field->setColumn('user_id'))
-            //                ->sortable()
-            //                ->searchable()
+            Text::make('ФИО', 'full_name')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('Компьютер', 'computer_name')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('IP Адрес', 'ip_address')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Text::make('MAC Адрес', 'mac_address')
+                ->sortable()
+                ->updateOnPreview(
+                    events: [AlpineJs::event(JsEvent::TABLE_ROW_UPDATED, 'index-table-{row-id}')]
+                ),
+            Enum::make('Статус', 'status')
+                ->default(0)
+                ->attach(BooleanStatus::class)
+                ->sortable(),
         ];
     }
 

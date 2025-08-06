@@ -30,7 +30,13 @@ Artisan::command('computers:ping', function () {
     $this->info("Completed! Successfully pinged {$success} of {$total} computers.");
 })->purpose('Ping all computers');
 
+Artisan::command('computers:clear-logs', function (): void {
+    Computer::clearLog();
+});
+
+
 Schedule::command('telescope:prune')->daily();
 Schedule::command('backup:clean')->daily()->at('01:00');
 Schedule::command('backup:run')->daily()->at('01:30');
-Schedule::command('computers:ping')->everyFifteenMinutes();
+Schedule::command('computers:ping')->everyMinute();
+Schedule::command('computers:clear-logs')->daily()->at('01:00');

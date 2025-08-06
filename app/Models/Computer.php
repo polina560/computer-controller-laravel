@@ -75,6 +75,13 @@ class Computer extends Model
                 exec("ping -c1 {$this->ip_address}", $output);
             } // *nix
             $this->statusUpdate($output);
+
+            $computer_log = new ComputerLog;
+            $computer_log->computer_id = $this->id;
+            $computer_log->status = $this->status;
+            $computer_log->updated_at = time();
+
+            $computer_log->save();
         } else {
             $command = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'
                 ? "ping -n 1 {$this->ip_address}"
@@ -82,13 +89,6 @@ class Computer extends Model
 
             ShellExecUpdateJob::dispatch($command, $this->id);
         }
-
-        $computer_log = new ComputerLog;
-        $computer_log->computer_id = $this->id;
-        $computer_log->status = $this->status;
-        $computer_log->updated_at = time();
-
-        $computer_log->save();
 
     }
 
@@ -152,6 +152,16 @@ class Computer extends Model
                 throw new Exception(
                     'Magic Packet failed to send!',
                 );
+            }
+        }
+    }
+
+    public static function clearLog(): void
+    {
+        $logs = ComputerLog::all();
+        foreach ($logs as $log) {
+            if (strtotime((string)$log->updated_at) < (time() - 24 * 60 * 60)) {
+                $log->delete();
             }
         }
     }
